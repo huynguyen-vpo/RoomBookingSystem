@@ -23,8 +23,8 @@ class BookingSeeder extends Seeder
         $user = User::all();
         $group = Group::all();
         $now = now();
-        $checkInDate  = $now->clone()->subDays(7)->startOfDay();
-        $checkOutDate =  $checkInDate->addDays(3)->endOfDay();
+        $checkInDate  = $now->copy()->subDays(7);
+        $checkOutDate =  $checkInDate->copy()->addDays(3);
 
         if($user->count()){
             for ($i = 1; $i <= $this::TOTALBOOKINGSBYUSER; $i++) {
