@@ -22,12 +22,14 @@ class BookingSeeder extends Seeder
 
         $user = User::all();
         $group = Group::all();
-        $now = now();
-        $checkInDate  = $now->copy()->subDays(7);
-        $checkOutDate =  $checkInDate->copy()->addDays(3);
-
+        
+        $start = now()->copy()->subDays(7);  
+        
         if($user->count()){
             for ($i = 1; $i <= $this::TOTALBOOKINGSBYUSER; $i++) {
+                $checkInDate = $start->copy()->addDays(rand(1, 14));
+                $randBookingDays = rand(1, 4); //random booking days
+                $checkOutDate =  $checkInDate->copy()->addDays($randBookingDays);
                 $randomUser = $user->random(1)->first();
                 Booking::factory()->create([
                     'target_type' => "App\Models\User",   
@@ -42,6 +44,9 @@ class BookingSeeder extends Seeder
 
         if($group->count()){
             for ($i = 1; $i <= $this::TOTALBOOKINGSBYGROUP; $i++) {
+                $checkInDate = $start->copy()->addDays(rand(1, 14));
+                $randBookingDays = rand(1, 4); //random booking days
+                $checkOutDate =  $checkInDate->copy()->addDays($randBookingDays);
                 $randomGroup = $group->random(1)->first();
                 Booking::factory()->create([
                     'target_type' => "App\Models\Group",   

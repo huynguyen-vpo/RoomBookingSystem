@@ -15,8 +15,8 @@ return new class extends Migration
         Schema::create('bookings', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->float('total_price');
-            $table->date('check_in_date');
-            $table->date('check_out_date');
+            $table->datetime('check_in_date');
+            $table->datetime('check_out_date');
             $table->uuid('target_id');
             $table->string('target_type');
             $table->timestamps();

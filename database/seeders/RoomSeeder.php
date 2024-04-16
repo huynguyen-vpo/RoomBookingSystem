@@ -18,9 +18,14 @@ class RoomSeeder extends Seeder
     public function run(): void
     {
         //
+        $total = Room::all();
+        $count = 1;
+        if($total->count()) {
+            $count = $total->count() + 1;
+        }
         $roomTypes = RoomType::all();
         if ($roomTypes->count()) {
-            for ($i = 1; $i <= $this::TOTALROOMS; $i++) {
+            for ($i = $count; $i <= $this::TOTALROOMS + $count - 1; $i++) {
                 Room::factory()->create([
                     'room_number' => $i,
                     'status' => RoomStatus::AVAILABLE,

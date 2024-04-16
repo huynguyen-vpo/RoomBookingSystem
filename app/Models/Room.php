@@ -32,6 +32,7 @@ class Room extends Model
         else $current = 4;
         
         return $query->where('capacity', $current)
+                        ->available()
                         ->with('type')
                         ->orderByDesc('created_at');
     }
