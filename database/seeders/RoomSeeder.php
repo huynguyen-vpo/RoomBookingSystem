@@ -19,7 +19,7 @@ class RoomSeeder extends Seeder
     {
         //
         $roomTypes = RoomType::all();
-        if ($roomTypes) {
+        if ($roomTypes->count()) {
             for ($i = 1; $i <= $this::TOTALROOMS; $i++) {
                 Room::factory()->create([
                     'room_number' => $i,
