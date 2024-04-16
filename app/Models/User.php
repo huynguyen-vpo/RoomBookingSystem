@@ -3,13 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes, HasUuids;
+
+    protected $table = "users";
 
     /**
      * The attributes that are mass assignable.
@@ -44,4 +49,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function groups() {
+        return $this->belongsToMany(Group::class, 'user_group', 'user_id', 'group_id');
+    }
+
+    public function bookings(){
+        return $this->morphMany(Booking::class, 'target');
+
+    }
+
 }
