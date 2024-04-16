@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\RoomType;
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use Exception;
 use Illuminate\Database\Seeder;
-use RoomConstant;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,8 +15,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(AvailableQuantitySeeder::class);
-        $this->call(RoomTypeSeeder::class);
-        $this->call(RoomSeeder::class);
+        DB::beginTransaction();
+        try{
+            $this->call(AvailableQuantitySeeder::class);
+            $this->call(RoomTypeSeeder::class);
+            $this->call(RoomSeeder::class);
+            $this->call(BookedRoomDaySeeder::class);
+        }catch (Exception $e){
+            DB::rollBack();
+            logger()->error($e->getMessage());
+        }
     }
 }
