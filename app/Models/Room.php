@@ -12,12 +12,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Room extends Model
 {
     use HasFactory, HasUuids;
-    protected $fillable = ['room_number', 'status', 'roomtype_id'];
+    protected $fillable = ['room_number', 'status', 'room_typeid'];
     protected $casts = [
         'id' => 'string',
     ];
     public function type(): HasOne{
-        return $this->hasOne(RoomType::class,'roomtype_id','id');
+        return $this->hasOne(RoomType::class,'room_typeid','id');
     }
     public function scopeAvailable(Builder $query, RoomStatus $status): Builder{
         return $query->where('status', $status)

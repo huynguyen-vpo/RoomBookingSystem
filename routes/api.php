@@ -1,8 +1,4 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:api');
+$routes = glob(__DIR__ . "/api/*.php");
+foreach ($routes as $route) require($route);
