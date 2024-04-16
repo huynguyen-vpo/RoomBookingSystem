@@ -15,7 +15,6 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('booking_id');
             $table->uuid('room_id');
-            $table->uuid('room_type_id');
             $table->date('booking_date');
             $table->float('price_per_day');
             $table->timestamps();
