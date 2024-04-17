@@ -2,3 +2,9 @@ enum RoomStatus{
     AVAILABLE @enum(value: 0)
     MAINTANACE @enum(value: 1)
 }
+enum RoomTypeEnum{
+    SINGLE @enum(value: 1)
+    DOUBLE @enum(value: 2)
+    TRIPLER @enum(value: 3)
+    QUARTER @enum(value: 4)
+}

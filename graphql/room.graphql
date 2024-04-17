@@ -1,9 +1,21 @@
+extend type Mutation {
+    createRoom(
+        input: CreateRoomInput! @spread,
+    ): Room! @field(resolver: "App\\GraphQL\\Mutations\\RoomMutation@create")
+}
+
+input CreateRoomInput {
+    room_number: Int @rules(apply:["required", "int", "unique:rooms,room_number"]),
+    status: RoomStatus,
+    room_type: RoomTypeEnum!,
+}
+
 extend type Query{
     room(
         id: ID! @whereKey
+        room_number: Int @where(operator: "like")
     ): Room @find
     rooms(
       room_number: Int @where(operator: "like")
     ): [Room!]! @paginate(defaultCount: 10)
 }
-
