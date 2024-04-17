@@ -17,7 +17,7 @@ class Room extends Model
         'id' => 'string',
     ];
     public function type(): HasOne{
-        return $this->hasOne(RoomType::class,'room_typeid','id');
+        return $this->hasOne(RoomType::class,'id','room_typeid');
     }
     public function scopeAvailable(Builder $query, RoomStatus $status): Builder{
         return $query->where('status', $status)

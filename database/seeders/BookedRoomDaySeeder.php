@@ -31,8 +31,6 @@ class BookedRoomDaySeeder extends Seeder
                         for ($j = 0; $j <= $randBookedRooms - 1; $j++) {
                             $valid = BookedRoomDay::bookedRoom($rooms[$j], $bookingDate);
                             if($valid->count() == 0){
-                                logger($valid->count());
-
                                 BookedRoomDay::create([
                                     'room_id' => $rooms[$j]->id,
                                     'booking_id' => $booking->id,

@@ -1,0 +1,4 @@
+enum RoomStatus{
+    AVAILABLE @enum(value: 0)
+    MAINTANACE @enum(value: 1)
+}

@@ -1,0 +1,13 @@
+type Room {
+    id: ID!
+    room_number: Int!
+    status: RoomStatus!
+    type: RoomType! @hasOne
+}
+
+type RoomType{
+    id: ID!
+    type: String!,
+    capacity: Int!
+    room: Room! @belongsTo
+}

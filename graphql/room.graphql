@@ -1,0 +1,9 @@
+extend type Query{
+    room(
+        id: ID! @whereKey
+    ): Room @find
+    rooms(
+      room_number: Int @where(operator: "like")
+    ): [Room!]! @paginate(defaultCount: 10)
+}
+

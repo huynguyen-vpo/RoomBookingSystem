@@ -15,6 +15,6 @@ class RoomType extends Model
         'id' => 'string',
     ];
     public function rooms(): BelongsTo{
-        return $this->belongsTo(Room::class,'roomtype_id','id');
+        return $this->belongsTo(Room::class,'room_typeid','id');
     }
 }
