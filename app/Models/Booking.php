@@ -19,6 +19,11 @@ class Booking extends Model
         "total_price"
     ];
 
+    protected $casts = [
+        'check_in_date' => 'datetime',
+        'check_out_date' => 'datetime',
+    ];
+
     public function target(){
         return $this->morphTo();
     }
