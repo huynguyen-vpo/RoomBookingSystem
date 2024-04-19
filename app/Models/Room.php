@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Room extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
-    protected $fillable = ['room_number', 'status', 'room_typeid'];
+    protected $fillable = ['room_number', 'view','price', 'status', 'room_typeid'];
     protected $casts = [
         'id' => 'string',
     ];

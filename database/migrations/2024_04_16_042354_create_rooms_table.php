@@ -16,6 +16,8 @@ return new class extends Migration
         Schema::create('rooms', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->integer('room_number')->unique();
+            $table->string('view');
+            $table->double('price');
             $table->tinyInteger('status')->unsigned()->default(RoomStatus::AVAILABLE->value);
             $table->uuid('room_typeid');
             $table->timestamps();

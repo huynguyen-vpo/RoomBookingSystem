@@ -41,7 +41,7 @@ final readonly class BotMutation
          ->withSafetySetting($safetySettingHateSpeech)
          ->withGenerationConfig($generationConfig);
 
-        $rooms = Room::with('type:id,type')->available(RoomStatus::AVAILABLE)->get(['id', 'room_typeid', 'room_number']);
+        $rooms = Room::with('type:id,type')->available(RoomStatus::AVAILABLE)->limit(100)->get(['id', 'view', 'price', 'room_typeid', 'room_number']);
         $chat = $generativeModel->startChat(history: [
             Content::parse(part: json_encode($rooms)),
             Content::parse(part: 'Yes', role: Role::MODEL)

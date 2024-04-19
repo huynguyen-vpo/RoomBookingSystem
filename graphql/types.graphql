@@ -2,6 +2,8 @@ scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date
 type Room {
     id: ID!
     room_number: Int!
+    view: String!
+    price: Int!
     status: RoomStatus!
     created_at: DateTime
     deleted_at: DateTime
