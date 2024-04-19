@@ -21,6 +21,11 @@ input CreateBookingByUserInput{
     userId: String  @rules(apply: ["string"]),
     checkInDate: DateTime  @rules(apply: ["date"]),
     checkOutDate: DateTime  @rules(apply: ["date"]),
+    numberOfPeople: Int @rules(apply: ["numeric"]),
+    singleNumber: Int @rules(apply: ["numeric"]),
+    doubleNumber: Int @rules(apply: ["numeric"]),
+    tripleNumber: Int @rules(apply: ["numeric"]),
+    quarterNumber: Int @rules(apply: ["numeric"]),
 }
 
 input CreateBookingByGroupInput{
@@ -28,4 +33,9 @@ input CreateBookingByGroupInput{
     groupId: String  @rules(apply: ["string"]),
     checkInDate: DateTime  @rules(apply: ["date"]),
     checkOutDate: DateTime  @rules(apply: ["date"]),
+    numberOfPeople: Int @rules(apply: ["numeric"]),
+    singleNumber: Int @rules(apply: ["numeric"]),
+    doubleNumber: Int @rules(apply: ["numeric"]),
+    tripleNumber: Int @rules(apply: ["numeric"]),
+    quarterNumber: Int @rules(apply: ["numeric"]),
 }
