@@ -18,6 +18,13 @@ class RoomSeeder extends Seeder
     public function run(): void
     {
         //
+        $view_templates = [
+            'sea',
+            'flower street',
+            'mountain',
+            'dusk',
+            'valley'
+        ];
         $total = Room::all();
         $count = 1;
         if($total->count()) {
@@ -28,6 +35,8 @@ class RoomSeeder extends Seeder
             for ($i = $count; $i <= $this::TOTALROOMS + $count - 1; $i++) {
                 Room::factory()->create([
                     'room_number' => $i,
+                    'view' => $view_templates[rand(0, count($view_templates) -1)],
+                    'price' => rand(1000, 10000),
                     'status' => RoomStatus::AVAILABLE,
                     'room_typeid' => $roomTypes->random(1)->first()->id,
                 ]);
