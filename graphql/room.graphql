@@ -1,9 +1,32 @@
+extend type Mutation {
+    createRoom(
+        input: CreateRoomInput! @spread,
+    ): Room! @field(resolver: "App\\GraphQL\\Mutations\\RoomMutation@create")
+    updateRoom(
+        input: UpdateRoomInput! @spread
+    ): Room @field(resolver: "App\\GraphQL\\Mutations\\RoomMutation@update")
+    deleteRoom(id: ID! @eq): Room @delete
+}
+
+input CreateRoomInput {
+    roomNumber: Int @rules(apply:["required", "int", "unique:rooms,room_number"]),
+    status: RoomStatus,
+    roomType: RoomTypeEnum!,
+}
+
+input UpdateRoomInput {
+    id: ID!,
+    roomNumber: Int @rules(apply:["int", "unique:rooms,room_number"]),
+    status: RoomStatus,
+    roomType: RoomTypeEnum!,
+}
+
 extend type Query{
     room(
         id: ID! @whereKey
+        roomNumber: Int @where(operator: "like")
     ): Room @find
     rooms(
-      room_number: Int @where(operator: "like")
+      roomNumber: Int @where(operator: "like")
     ): [Room!]! @paginate(defaultCount: 10)
 }
-

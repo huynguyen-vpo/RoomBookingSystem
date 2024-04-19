@@ -7,17 +7,19 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Room extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, SoftDeletes;
     protected $fillable = ['room_number', 'status', 'room_typeid'];
     protected $casts = [
         'id' => 'string',
     ];
-    public function type(): HasOne{
-        return $this->hasOne(RoomType::class,'id','room_typeid');
+    public function type(): BelongsTo{
+        return $this->belongsTo(RoomType::class,'room_typeid', 'id');
     }
     public function scopeAvailable(Builder $query, RoomStatus $status): Builder{
         return $query->where('status', $status)

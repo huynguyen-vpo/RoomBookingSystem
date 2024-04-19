@@ -1,15 +1,18 @@
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
 type Room {
     id: ID!
     room_number: Int!
     status: RoomStatus!
-    type: RoomType! @hasOne
+    created_at: DateTime
+    deleted_at: DateTime
+    type: RoomType! @belongsTo
 }
 
 type RoomType{
     id: ID!
     type: String!,
     capacity: Int!
-    room: Room! @belongsTo
+    room: Room! @hasMany
 }
 
 type User{
