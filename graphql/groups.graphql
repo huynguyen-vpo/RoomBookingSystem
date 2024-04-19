@@ -1,0 +1,18 @@
+extend type Query{
+    groups: [Group!] @paginate(defaultCount: 10)
+}
+
+extend type Mutation{
+   createGroup(input: CreateGroupInput! @spread): Group! @field(resolver: "App\\GraphQL\\Mutations\\GroupMutation@create")
+   updateGroup(input: UpdateGroupInput! @spread): Group! @field(resolver: "App\\GraphQL\\Mutations\\GroupMutation@update")
+   deleteGroup(groupId: String!): Group! @field(resolver: "App\\GraphQL\\Mutations\\GroupMutation@delete")
+}
+
+input CreateGroupInput{
+    name: String @rules(apply: ["required", "string"]),
+}
+
+input UpdateGroupInput{
+    groupId: String @rules(apply: ["required", "string"]),
+    name: String @rules(apply: ["string"]),
+}

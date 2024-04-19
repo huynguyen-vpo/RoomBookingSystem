@@ -11,3 +11,23 @@ type RoomType{
     capacity: Int!
     room: Room! @belongsTo
 }
+
+type User{
+    id: ID!
+    name: String!
+    email: String!
+    groups: [Group!]! @belongsToMany 
+}
+
+type Group{
+    id: ID!
+    name: String!
+    users: [User!]! @belongsToMany
+}
+
+type Booking{
+    id: ID!
+    total_price: Int!
+    target_id: String!
+    target_type: String!
+}
