@@ -4,3 +4,5 @@
 #import bot.graphql
 #import types.graphql
 #import enums.graphql
+#import users.graphql
+#import groups.graphql

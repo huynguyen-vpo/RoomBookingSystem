@@ -1,0 +1,33 @@
+extend type Query{
+ #   users: [User!] @paginate(defaultCount: 10)
+    users(filter: UserFilter): [User!]! @field(resolver: "App\\GraphQL\\Queries\\UserQuery@filter")
+}
+
+extend type Mutation{
+    createUser(input: CreateUserInput! @spread): User! @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@create")
+    updateUser(input: UpdateUserInput! @spread): User! @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@update")
+    deleteUser(user_id: String!): User! @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@delete")
+    addUserToGroup(input: AddUserToGroupInput! @spread): User! @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@addUserToGroup")
+}
+
+input UserFilter{
+    id: String
+    email: String
+    name: String
+}
+
+input CreateUserInput {
+    name: String  @rules(apply: ["required", "string"]),
+    email: String @rules(apply: ["required", "email", "unique:users,email"])
+    password: String @rules(apply: ["string"]),
+}
+
+input UpdateUserInput {
+    userId: String  @rules(apply: ["required", "string"]),
+    name: String @rules(apply: ["string"])
+}
+
+input AddUserToGroupInput {
+    userId: String  @rules(apply: ["required", "string"]),
+    groupId: String @rules(apply: ["required", "string"])
+}
