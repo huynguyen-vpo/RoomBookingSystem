@@ -1,5 +1,6 @@
 #import booking.graphql
 #import group.graphql
 #import room.graphql
+#import bot.graphql
 #import types.graphql
 #import enums.graphql

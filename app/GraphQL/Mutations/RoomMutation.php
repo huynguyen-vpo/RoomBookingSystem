@@ -18,19 +18,35 @@ final readonly class RoomMutation
     public function create(null $_, array $args)
     {
         // TODO implement the resolver
-        $roomTypeId = RoomType::capacity($args["room_type"])->first()->id;
-        DB::beginTransaction();
+        $roomTypeId = RoomType::capacity($args["roomType"] ?? 1)->first()->id;
         try{
             $created = Room::create([
-                "room_number" => $args["room_number"],
+                "room_number" => $args["roomNumber"],
                 "status" => $args["status"] ?? RoomStatus::AVAILABLE,
-                "room_typeid" => $roomTypeId
+                "room_typeid" => $args["roomType"] ? $roomTypeId : null  
             ]);
-            DB::commit();
         }catch(Exception $e){
-            DB::rollBack();
             logger()->error("". $e->getMessage());
         }
         return $created;
+    }
+    public function update(null $_, array $args){
+        $roomTypeId = RoomType::capacity($args["roomType"])->first()->id;
+        $room = Room::findOrFail($args["id"]);
+        try{
+            $room->update([
+                "room_number" => $args["roomNumber"] ?? $room->room_number,
+                "status" => $args["status"] ?? RoomStatus::AVAILABLE,
+                "room_typeid" => $args["roomType"] ? $roomTypeId : $room->room_typeid 
+            ]);
+        }catch(Exception $e){
+            logger()->error("". $e->getMessage());
+        }
+        return $room;
+    }
+    public function delete(null $_, array $args){
+        $room = Room::findOrFail($args["id"]);
+        $room->delete();
+        return $room;
     }
 }

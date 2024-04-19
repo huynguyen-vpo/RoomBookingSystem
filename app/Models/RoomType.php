@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RoomType extends Model
 {
@@ -15,8 +16,8 @@ class RoomType extends Model
     protected $casts = [
         'id' => 'string',
     ];
-    public function rooms(): BelongsTo{
-        return $this->belongsTo(Room::class,'room_typeid','id');
+    public function rooms(): HasMany{
+        return $this->hasMany(Room::class, 'room_typeid','id');
     }
     public function scopeCapacity(Builder $query, int $capcity): Builder{
         $current = 0;

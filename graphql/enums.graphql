@@ -5,6 +5,6 @@ enum RoomStatus{
 enum RoomTypeEnum{
     SINGLE @enum(value: 1)
     DOUBLE @enum(value: 2)
-    TRIPLER @enum(value: 3)
+    TRIPLE @enum(value: 3)
     QUARTER @enum(value: 4)
 }

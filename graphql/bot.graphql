@@ -1,0 +1,5 @@
+extend type Mutation{
+    ask(content: String!): String! @field(
+        resolver: "App\\GraphQL\\Mutations\\BotMutation"
+    )
+}
