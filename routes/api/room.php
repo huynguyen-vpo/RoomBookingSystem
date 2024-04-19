@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,4 +14,5 @@ Route::prefix('rooms')
         
         Route::resource('', RoomController::class)
             ->only(['index', 'store']);
-    });
+        });
+        

@@ -11,10 +11,10 @@
         "laravel/passport": "^12.0",
         "laravel/telescope": "^5.0",
         "laravel/tinker": "^2.9",
-        "maatwebsite/excel": "*",
         "mll-lab/graphql-php-scalars": "^6.2",
         "mll-lab/laravel-graphiql": "^3.2",
-        "nuwave/lighthouse": "^6.36"
+        "nuwave/lighthouse": "^6.36",
+        "maatwebsite/excel": "^3.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -52,6 +52,9 @@
             "@php artisan key:generate --ansi",
             "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan migrate --graceful --ansi"
+        ],
+        "ignore-update":[
+            "@composer update --ignore-platform-reqs"
         ]
     },
     "extra": {
