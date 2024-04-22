@@ -19,6 +19,7 @@ return new class extends Migration
             $table->datetime('check_out_date');
             $table->uuid('target_id');
             $table->string('target_type');
+            $table->uuid('user_id');
             $table->timestamps();
             $table->softDeletes(); 
         });
