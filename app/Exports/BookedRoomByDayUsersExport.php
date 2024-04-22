@@ -7,10 +7,11 @@ use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class BookedRoomByDayExport implements FromView, ShouldAutoSize, WithStyles
+class BookedRoomByDayUsersExport implements FromView, ShouldAutoSize, WithStyles
 {
     /**
     * @return \Illuminate\Support\Collection
@@ -19,7 +20,7 @@ class BookedRoomByDayExport implements FromView, ShouldAutoSize, WithStyles
     {
         //
         return view('exports/booking-by-day-excel-template', [
-            'bookings' => BookedRoomDay::with(['room', 'booking.target'])->get()
+            'bookings' => BookedRoomDay::with(['room', 'booking.target'])->whereRelation('booking.target', 'email', '<>', null)->get()
         ]);
     }
 
@@ -27,7 +28,7 @@ class BookedRoomByDayExport implements FromView, ShouldAutoSize, WithStyles
     {
         return [
             // Style the first row as bold text.
-            1    => ['font' => ['bold' => true, 'size' => 18]],
+            1 => ['font' => ['bold' => true, 'size' => 18]],
         ];
     }
 }
