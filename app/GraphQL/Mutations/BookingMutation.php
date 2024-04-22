@@ -2,6 +2,7 @@
 
 namespace App\GraphQL\Mutations;
 
+use App\Events\BookingProcessed;
 use App\Models\AvailableQuantity;
 use App\Models\BookedRoomDay;
 use App\Models\Booking;
@@ -15,13 +16,18 @@ use DatePeriod;
 use DateTime;
 use Illuminate\Support\Facades\DB;
 
+
 final readonly class BookingMutation
 {
+
+    
     /** @param  array{}  $args */
     public function __invoke(null $_, array $args)
     {
         // TODO implement the resolver
     }
+
+
 
     public function createBookingByUser(null $_, array $args){  
         $numberOfPeople = $args['numberOfPeople'];
@@ -49,6 +55,9 @@ final readonly class BookingMutation
         $newBooking->total_price =  0;
         $user->bookings()->save($newBooking);
         $bookingId = $newBooking->id;
+
+        // Send email to client after creating booking
+        event(new BookingProcessed($newBooking));
       
         # Add booked room days
         $arrayDates = $this->getDatesFromRange($checkInDate, $checkOutDate, 'Y-m-d');
@@ -58,7 +67,8 @@ final readonly class BookingMutation
             $this->addBookedRoomDays($bookingId , $value, $tripleTypeId,  $tripleNumber);
             $this->addBookedRoomDays($bookingId , $value, $quarterTypeId,  $quarterNumber);
         }
-        return  $newBooking;
+    
+        return $newBooking;
         
     }
 
