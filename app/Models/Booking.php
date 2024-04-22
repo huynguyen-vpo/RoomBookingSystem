@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Booking extends Model
@@ -16,7 +17,8 @@ class Booking extends Model
     protected $fillable = [
         "check_in_date",
         "check_out_date", 
-        "total_price"
+        "total_price",
+        "user_id",    
     ];
 
     protected $casts = [
@@ -26,5 +28,9 @@ class Booking extends Model
 
     public function target(){
         return $this->morphTo();
+    }
+
+    public function user(): BelongsTo{
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

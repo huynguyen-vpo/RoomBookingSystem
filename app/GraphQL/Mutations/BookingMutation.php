@@ -53,6 +53,7 @@ final readonly class BookingMutation
         $newBooking->check_in_date = $args['checkInDate'];
         $newBooking->check_out_date = $args['checkOutDate'];
         $newBooking->total_price =  0;
+        $newBooking->user_id = $user->id;
         $user->bookings()->save($newBooking);
         $bookingId = $newBooking->id;
 
@@ -107,6 +108,7 @@ final readonly class BookingMutation
             $newBooking->check_in_date = $checkInDate;
             $newBooking->check_out_date = $checkOutDate;
             $newBooking->total_price =  $totalPrice;
+            $newBooking->user_id = $user->id;
             $group->bookings()->save($newBooking); 
             $bookingId = $newBooking->id;       
            
