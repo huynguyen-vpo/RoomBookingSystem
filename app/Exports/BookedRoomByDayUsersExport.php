@@ -20,7 +20,7 @@ class BookedRoomByDayUsersExport implements FromView, ShouldAutoSize, WithStyles
     {
         //
         return view('exports/booking-by-day-excel-template', [
-            'bookings' => BookedRoomDay::with(['room', 'booking.target'])->whereRelation('booking.target', 'email', '<>', null)->get()
+            'bookings' => BookedRoomDay::with(['room', 'booking.target'])->get()
         ]);
     }
 

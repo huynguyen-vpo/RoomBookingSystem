@@ -54,7 +54,13 @@
             "@php artisan migrate --graceful --ansi"
         ],
         "ignore-update":[
-            "@composer update --ignore-platform-reqs"
+            "@composer update --ignore-platform-reqs --with-all-dependencies"
+        ],
+        "clear": [
+            "@php artisan config:cache",
+            "@php artisan cache:clear",
+            "@php artisan config:clear",
+            "@php artisan route:clear"
         ]
     },
     "extra": {
