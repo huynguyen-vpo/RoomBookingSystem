@@ -3,6 +3,7 @@
 namespace App\GraphQL\Mutations;
 
 use App\Events\BookingProcessed;
+use App\Exceptions\CustomException;
 use App\Models\AvailableQuantity;
 use App\Models\BookedRoomDay;
 use App\Models\Booking;
@@ -16,6 +17,7 @@ use DatePeriod;
 use DateTime;
 use Illuminate\Support\Facades\DB;
 
+use function PHPUnit\Framework\isEmpty;
 
 final readonly class BookingMutation
 {
@@ -43,8 +45,11 @@ final readonly class BookingMutation
         $tripleTypeId = RoomType::where('type', 'triple')->first()->id;
         $quarterTypeId = RoomType::where('type', 'quarter')->first()->id;
 
-        if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){
-            return false;
+        if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){   
+            $anotherOption = $this->suggestAnotherOption($numberOfPeople);
+            throw new CustomException(
+                'Suggest another options',
+                json_encode($anotherOption));
         }
 
         # Add booking for user
@@ -90,7 +95,8 @@ final readonly class BookingMutation
         $quarterTypeId = RoomType::where('type', 'quarter')->first()->id;
 
         if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){
-            return false;
+            //return ["Another option: " => $this->suggestAnotherOption($numberOfPeople)];
+          return ["single:" => 1, "double:" => 4, "triple:" => 3, "quarter:" => 2];
         }
 
         $user = User::findOrFail($args['userId']);
@@ -101,7 +107,12 @@ final readonly class BookingMutation
             $currentDate = date('Y-m-d');
             if(Booking::where('target_id', $groupId)
                     ->whereDate('created_at', [$currentDate])
-                    ->exists()) return;
+                    ->exists()){
+
+                throw new CustomException(
+                    'Bad request',
+                    'Another user in your group already booked');   
+            }
 
             # Add booking for group
             $newBooking = new Booking();
@@ -120,16 +131,22 @@ final readonly class BookingMutation
                 $this->addBookedRoomDays($bookingId , $value, $tripleTypeId,  $tripleNumber);
                 $this->addBookedRoomDays($bookingId , $value, $quarterTypeId,  $quarterNumber);
             }
-            return  $newBooking;
-        }  
-        return false;
+            return $newBooking;
+        }
+        else{
+            throw new CustomException(
+                'Bad request',
+                'User is not in group');  
+        }
       
     }
 
     public function validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate){
         // Validate capacity of booking
         if( $numberOfPeople > $singleNumber +  $doubleNumber*2 +  $tripleNumber*3 + $quarterNumber*4){
-            return;
+            throw new CustomException(
+                'Bad request',
+                'The number of peoples exceeds capacity');  
         }
         // Validate available rooms
         $arrayDates = $this->getDatesFromRange($checkInDate, $checkOutDate, 'Y-m-d');
@@ -195,10 +212,6 @@ final readonly class BookingMutation
         return   $availableRoomIdOfType;                                      
     }
 
-    public function test(null $_, array $args){ 
-
-    }
-
     public function suggestAnotherOption($numberOfPeople){
         $capacity = array(4,3,2,1);
         $result = array(4 => 0, 3 => 0, 2 => 0, 1 => 0);
@@ -211,7 +224,11 @@ final readonly class BookingMutation
             }
             $i++;
         }
-         return $result;
+        $customResult = array("Quarter" => $result[4],
+                              "Triple" => $result[3], 
+                              "Double" => $result[2],
+                              "Single" => $result[1]);
+         return $customResult;
     }
 
 
