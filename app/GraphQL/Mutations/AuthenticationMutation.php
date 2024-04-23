@@ -25,8 +25,8 @@ class AuthenticationMutation
     {
         $request = Request::create('oauth/token', 'POST', [
             'grant_type' => 'client_credentials',
-            'client_id' => env('PASSPORT_CLIENT_ID', "9bddc551-31bb-4ac9-b354-3040875ab0d4"),
-            'client_secret' => env('PASSPORT_CLIENT_SECRET', "bVCYMD9AwHeBhG92ybhUgk03lYMCwlKXgfWJ9bf4"),
+            'client_id' => env('PASSPORT_CLIENT_ID', "9bdf9232-6dd3-46cc-8d2d-ccb05197a0f5"),
+            'client_secret' => env('PASSPORT_CLIENT_SECRET', "wdaQtZPYx87i7xlzvbIR8XIJytSWbanOMegPbjmb"),
             // 'username' => $user->email,
             // 'password' => $user->password,
             // 'code' => '',
