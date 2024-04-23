@@ -13,8 +13,7 @@ class BookedRoomByDayMultiSheetExport implements WithMultipleSheets
     {   
         return [
             new BookedRoomByDayUsersExport(),
-            new BookedRoomByDayUsersExport(),
-            // new BookedRoomByDayGroupsExport(),
+            new BookedRoomByDayGroupsExport(),
         ];
     }
 }

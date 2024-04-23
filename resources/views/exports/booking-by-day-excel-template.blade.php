@@ -1,3 +1,4 @@
+<h1>Booking Export - {{$date}}</h1>
 <table>
     <thead>
     <tr>
