@@ -27,5 +27,5 @@ extend type Query{
     ): Room @find
     rooms(
       room_number: Int @where(operator: "like")
-    ): [Room!]! @paginate(defaultCount: 10) @guard(with: ["api"])
+    ): [Room!]! @paginate(defaultCount: 10) @guard
 }

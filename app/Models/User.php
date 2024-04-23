@@ -58,7 +58,6 @@ class User extends Authenticatable
 
     public function bookings(){
         return $this->morphMany(Booking::class, 'target');
-
     }
 
 }
