@@ -1,8 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace App\GraphQL\Mutations;
+namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Events\BookingProcessed;
+use App\Http\Requests\BookingByGroupRequest;
+use App\Http\Requests\BookingByUserRequest;
 use App\Models\AvailableQuantity;
 use App\Models\BookedRoomDay;
 use App\Models\Booking;
@@ -16,27 +19,16 @@ use DatePeriod;
 use DateTime;
 use Illuminate\Support\Facades\DB;
 
-
-final readonly class BookingMutation
+class BookingController extends Controller
 {
-
-    
-    /** @param  array{}  $args */
-    public function __invoke(null $_, array $args)
-    {
-        // TODO implement the resolver
-    }
-
-
-
-    public function createBookingByUser(null $_, array $args){  
-        $numberOfPeople = $args['numberOfPeople'];
-        $singleNumber = $args['singleNumber'];
-        $doubleNumber = $args['doubleNumber'];
-        $tripleNumber = $args['tripleNumber'];
-        $quarterNumber = $args['quarterNumber'];
-        $checkInDate = $args['checkInDate'];
-        $checkOutDate = $args['checkOutDate'];
+    public function createBookingByUser(BookingByUserRequest $request){  
+        $numberOfPeople = $request['numberOfPeople'];
+        $singleNumber = $request['singleNumber'];
+        $doubleNumber = $request['doubleNumber'];
+        $tripleNumber = $request['tripleNumber'];
+        $quarterNumber = $request['quarterNumber'];
+        $checkInDate = $request['checkInDate'];
+        $checkOutDate = $request['checkOutDate'];
         
         $singleTypeId = RoomType::where('type', 'single')->first()->id;
         $doubleTypeId = RoomType::where('type', 'double')->first()->id;
@@ -44,14 +36,14 @@ final readonly class BookingMutation
         $quarterTypeId = RoomType::where('type', 'quarter')->first()->id;
 
         if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){
-            return false;
+            return response()->json(['Another option' => $this->suggestAnotherOption($numberOfPeople)], 200);
         }
 
         # Add booking for user
-        $user = User::findOrFail($args['userId']);
+        $user = User::findOrFail($request['userId']);
         $newBooking = new Booking();
-        $newBooking->check_in_date = $args['checkInDate'];
-        $newBooking->check_out_date = $args['checkOutDate'];
+        $newBooking->check_in_date = $request['checkInDate'];
+        $newBooking->check_out_date = $request['checkOutDate'];
         $newBooking->total_price =  0;
         $newBooking->user_id = $user->id;
         $user->bookings()->save($newBooking);
@@ -73,15 +65,17 @@ final readonly class BookingMutation
         
     }
 
-    public function createBookingByGroup(null $_, array $args){
-        $groupId = $args['groupId'];
-        $numberOfPeople = $args['numberOfPeople'];
-        $singleNumber = $args['singleNumber'];
-        $doubleNumber = $args['doubleNumber'];
-        $tripleNumber = $args['tripleNumber'];
-        $quarterNumber = $args['quarterNumber'];
-        $checkInDate = $args['checkInDate'];
-        $checkOutDate = $args['checkOutDate'];
+    public function createBookingByGroup(BookingByGroupRequest $request){
+        $groupId = $request['groupId'];
+        $userId =  $request['userId'];
+        $numberOfPeople = $request['numberOfPeople'];
+        $singleNumber = $request['singleNumber'];
+        $doubleNumber = $request['doubleNumber'];
+        $tripleNumber = $request['tripleNumber'];
+        $quarterNumber = $request['quarterNumber'];
+        $checkInDate = $request['checkInDate'];
+        $checkOutDate = $request['checkOutDate'];
+
         $totalPrice = 0;
 
         $singleTypeId = RoomType::where('type', 'single')->first()->id;
@@ -90,18 +84,20 @@ final readonly class BookingMutation
         $quarterTypeId = RoomType::where('type', 'quarter')->first()->id;
 
         if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){
-            return false;
+            return response()->json(['Another option' => $this->suggestAnotherOption($numberOfPeople)], 200);
         }
 
-        $user = User::findOrFail($args['userId']);
+        $user = User::findOrFail($userId);
         if($user->groups()->where('groups.id',$groupId )->exists()){
-            $group = Group::findOrFail($args['groupId']);
+            $group = Group::findOrFail($request['groupId']);
             
             # Validate if another user of the group already booked in the current date
             $currentDate = date('Y-m-d');
             if(Booking::where('target_id', $groupId)
                     ->whereDate('created_at', [$currentDate])
-                    ->exists()) return;
+                    ->exists()){   
+                return response()->json(['message' => 'Another user in your group already booked'], 400);
+            }
 
             # Add booking for group
             $newBooking = new Booking();
@@ -122,14 +118,14 @@ final readonly class BookingMutation
             }
             return  $newBooking;
         }  
-        return false;
+        return response()->json(['message' => 'User is not in group'], 404);
       
     }
 
     public function validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate){
         // Validate capacity of booking
         if( $numberOfPeople > $singleNumber +  $doubleNumber*2 +  $tripleNumber*3 + $quarterNumber*4){
-            return;
+           return false;
         }
         // Validate available rooms
         $arrayDates = $this->getDatesFromRange($checkInDate, $checkOutDate, 'Y-m-d');
@@ -195,10 +191,6 @@ final readonly class BookingMutation
         return   $availableRoomIdOfType;                                      
     }
 
-    public function test(null $_, array $args){ 
-
-    }
-
     public function suggestAnotherOption($numberOfPeople){
         $capacity = array(4,3,2,1);
         $result = array(4 => 0, 3 => 0, 2 => 0, 1 => 0);
@@ -213,6 +205,4 @@ final readonly class BookingMutation
         }
          return $result;
     }
-
-
 }
