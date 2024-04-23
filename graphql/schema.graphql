@@ -1,3 +1,4 @@
+#import authentication.graphql
 #import booking.graphql
 #import group.graphql
 #import room.graphql

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\BookedRoomByDayExport;
+use App\Exports\MultipleSheet\BookedRoomByDayMultiSheetExport;
 use App\Exports\RoomExport;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -19,6 +20,6 @@ class ExportController extends Controller
     public function exportBookingByDay(Request $request)
     {
         $now = now()->utc()->format('d-m-Y');
-        return Excel::download(new BookedRoomByDayExport, "[$now]_booking_by_day.xlsx");
+        return Excel::download(new BookedRoomByDayMultiSheetExport, "[$now]_booking_by_day.xlsx");
     }
 }
