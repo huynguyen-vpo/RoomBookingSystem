@@ -1,0 +1,12 @@
+extend type Query{
+ #   users: [User!] @paginate(defaultCount: 10)
+    users(filter: UserFilter): [User!]! @field(resolver: "App\\GraphQL\\Queries\\UserQuery@filter")
+}
+
+extend type Mutation{
+    createUser(input: CreateUserInput! @spread): User! @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@create")
+    updateUser(input: UpdateUserInput! @spread): User! @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@update")
+    deleteUser(user_id: String!): User! @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@delete")
+    addUserToGroup(input: AddUserToGroupInput! @spread): User! @field(resolver: "App\\GraphQL\\Mutations\\UserMutation@addUserToGroup")
+}
+

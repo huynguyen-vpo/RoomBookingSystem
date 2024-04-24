@@ -39,3 +39,64 @@ input UpdatePassword {
     password: String! @rules(apply: ["required", "confirmed", "min:8"])
     password_confirmation: String!
 }
+
+input UserFilter{
+    id: String
+    email: String
+    name: String
+}
+
+input CreateUserInput {
+    name: String  @rules(apply: ["required", "string"]),
+    email: String @rules(apply: ["required", "email", "unique:users,email"])
+    password: String @rules(apply: ["string"]),
+}
+
+input UpdateUserInput {
+    userId: String  @rules(apply: ["required", "string"]),
+    name: String @rules(apply: ["string"])
+}
+
+input AddUserToGroupInput {
+    userId: String  @rules(apply: ["required", "string"]),
+    groupId: String @rules(apply: ["required", "string"])
+}
+
+input BookingFilter{
+    checkInDate: DateTime
+    checkOutDate: DateTime
+    targetId: String
+}
+
+input CreateBookingByUserInput{
+    userId: String  @rules(apply: ["string"]),
+    checkInDate: DateTime  @rules(apply: ["date"]),
+    checkOutDate: DateTime  @rules(apply: ["date"]),
+    numberOfPeople: Int @rules(apply: ["numeric"]),
+    singleNumber: Int @rules(apply: ["numeric"]),
+    doubleNumber: Int @rules(apply: ["numeric"]),
+    tripleNumber: Int @rules(apply: ["numeric"]),
+    quarterNumber: Int @rules(apply: ["numeric"]),
+}
+
+input CreateBookingByGroupInput{
+    userId: String  @rules(apply: ["string"]),
+    groupId: String  @rules(apply: ["string"]),
+    checkInDate: DateTime  @rules(apply: ["date"]),
+    checkOutDate: DateTime  @rules(apply: ["date"]),
+    numberOfPeople: Int @rules(apply: ["numeric"]),
+    singleNumber: Int @rules(apply: ["numeric"]),
+    doubleNumber: Int @rules(apply: ["numeric"]),
+    tripleNumber: Int @rules(apply: ["numeric"]),
+    quarterNumber: Int @rules(apply: ["numeric"]),
+}
+
+input CreateGroupInput{
+    name: String @rules(apply: ["required", "string"]),
+}
+
+input UpdateGroupInput{
+    groupId: String @rules(apply: ["required", "string"]),
+    name: String @rules(apply: ["string"]),
+}
+
