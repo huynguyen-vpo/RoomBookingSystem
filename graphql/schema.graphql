@@ -5,3 +5,4 @@
 #import groups.graphql
 #import booking.graphql
 #import room.graphql
+#import auth.graphql

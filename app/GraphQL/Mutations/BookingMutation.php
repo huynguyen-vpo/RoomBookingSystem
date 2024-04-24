@@ -19,14 +19,13 @@ use Illuminate\Support\Facades\DB;
 final class BookingMutation
 {
     /**
-     * @param  null  $_
      * @param  array{}  $args
      */
     public function __invoke($_, array $args)
     {
         // TODO implement the resolver
     }
-    public function createBookingByUser(null $_, array $args){  
+    public function createBookingByUser($_, array $args){  
         $numberOfPeople = $args['numberOfPeople'];
         $singleNumber = $args['singleNumber'];
         $doubleNumber = $args['doubleNumber'];
@@ -72,7 +71,7 @@ final class BookingMutation
         
     }
 
-    public function createBookingByGroup(null $_, array $args){
+    public function createBookingByGroup($_, array $args){
         $groupId = $args['groupId'];
         $numberOfPeople = $args['numberOfPeople'];
         $singleNumber = $args['singleNumber'];

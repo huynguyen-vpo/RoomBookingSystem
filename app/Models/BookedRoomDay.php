@@ -30,7 +30,7 @@ class BookedRoomDay extends Model
         return $this->belongsTo(Booking::class, 'booking_id');
     }
 
-    public function scopeBookedRoom(Builder $query, mixed $roomId, DateTime $date){
+    public function scopeBookedRoom(Builder $query, Room $roomId, DateTime $date){
         return $query
             ->where('room_id', $roomId)
             ->whereDate('booking_date', '=', $date)

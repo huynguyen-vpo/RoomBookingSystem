@@ -7,12 +7,12 @@ use App\Models\Booking;
 final class BookingQuery
 {
     /** @param  array{}  $args */
-    public function __invoke(null $_, array $args)
+    public function __invoke($_, array $args)
     {
         // TODO implement the resolver
     }
 
-    public function filter(null $_, array $args){
+    public function filter($_, array $args){
         $booking = Booking::query();
   
         if (isset($args['filter'])) {

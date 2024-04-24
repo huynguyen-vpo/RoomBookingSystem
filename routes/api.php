@@ -1,11 +1,5 @@
 <?php
 
-use App\Jobs\SendEmailJob;
-use App\Models\Room;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -17,10 +11,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-Route::get('/wel', function(){
-    $user = User::find("4b346fed-8445-4838-b93d-dc89aa57c1cb");
-    dispatch(new SendEmailJob($user));
-});
+$routes = glob(__DIR__ . "/api/*.php");
+foreach ($routes as $route) require($route);
