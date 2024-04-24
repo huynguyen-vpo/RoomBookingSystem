@@ -1,46 +1,4 @@
 scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
-
-type User {
-    id: ID!
-    name: String!
-    email: String!
-}
-
-type AuthPayload {
-    access_token: String
-    refresh_token: String
-    expires_in: Int
-    token_type: String
-    user: User
-}
-
-type RefreshTokenPayload {
-    access_token: String!
-    refresh_token: String!
-    expires_in: Int!
-    token_type: String!
-}
-
-type LogoutResponse {
-    status: String!
-    message: String
-}
-
-type ForgotPasswordResponse {
-    status: String!
-    message: String
-}
-
-type RegisterResponse {
-    tokens: AuthPayload
-    status: RegisterStatuses!
-}
-
-type UpdatePasswordResponse {
-    status: String!
-    message: String
-}
-
 type Room {
     id: ID!
     room_number: Int!
@@ -57,6 +15,14 @@ type RoomType{
     type: String!,
     capacity: Int!
     room: Room! @hasMany
+}
+
+type User {
+    id: ID!
+    name: String!
+    email: String!
+    created_at: DateTime!
+    updated_at: DateTime!
 }
 
 type Group{

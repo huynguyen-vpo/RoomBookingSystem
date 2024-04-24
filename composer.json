@@ -13,9 +13,11 @@
         "laravel/passport": "^10.4",
         "laravel/telescope": "^5.0",
         "laravel/tinker": "^2.5",
+        "maatwebsite/excel": "^3.1",
         "mll-lab/laravel-graphiql": "^2.0",
         "mll-lab/laravel-graphql-playground": "^2.6",
-        "nuwave/lighthouse": "^5.72"
+        "nuwave/lighthouse": "^5.72",
+        "predis/predis": "^2.2"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

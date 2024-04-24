@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class UpdateSocialProviderUsersTable extends Migration
+class UpdateSocialProvidersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,18 +13,19 @@ class UpdateSocialProviderUsersTable extends Migration
      */
     public function up()
     {
+        //
         Schema::table('users', function (Blueprint $table) {
             if (! Schema::hasColumn('users', 'avatar')) {
                 $table->string('avatar')->nullable();
             }
         });
+        Schema::dropIfExists('social_providers');
         Schema::create('social_providers', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('user_id');
             $table->string('provider')->index();
             $table->string('provider_id')->index();
             $table->timestamps();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -35,6 +36,7 @@ class UpdateSocialProviderUsersTable extends Migration
      */
     public function down()
     {
+        //
         Schema::dropIfExists('social_providers');
     }
 }

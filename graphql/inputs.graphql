@@ -1,43 +1,14 @@
-input LoginInput {
-    username: String!
-    password: String!
+input CreateRoomInput {
+    roomNumber: Int @rules(apply:["required", "int", "unique:rooms,room_number"]),
+    status: String,
+    roomType: RoomTypeEnum!,
 }
 
-input RefreshTokenInput {
-    refresh_token: String
-}
-
-input ForgotPasswordInput {
-    email: String! @rules(apply: ["required", "email"])
-}
-
-input NewPasswordWithCodeInput {
-    email: String! @rules(apply: ["required", "email"])
-    token: String! @rules(apply: ["required", "string"])
-    password: String! @rules(apply: ["required", "confirmed", "min:8"])
-    password_confirmation: String!
-}
-
-input RegisterInput {
-    name: String! @rules(apply: ["required", "string"])
-    email: String! @rules(apply: ["required", "email", "unique:users,email"])
-    password: String! @rules(apply: ["required", "confirmed", "min:8"])
-    password_confirmation: String!
-}
-
-input SocialLoginInput {
-    provider: String! @rules(apply: ["required"])
-    token: String! @rules(apply: ["required"])
-}
-
-input VerifyEmailInput {
-    token: String!
-}
-
-input UpdatePassword {
-    old_password: String!
-    password: String! @rules(apply: ["required", "confirmed", "min:8"])
-    password_confirmation: String!
+input UpdateRoomInput {
+    id: ID!,
+    roomNumber: Int @rules(apply:["int", "unique:rooms,room_number"]),
+    status: String,
+    roomType: RoomTypeEnum!,
 }
 
 input UserFilter{

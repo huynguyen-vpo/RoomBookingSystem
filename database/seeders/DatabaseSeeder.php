@@ -16,9 +16,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call(AvailableQuantitySeeder::class);
-                $this->call(RoomTypeSeeder::class);
-                $this->call(RoomSeeder::class);
         DB::beginTransaction();
             try{
                 $this->call(AvailableQuantitySeeder::class);
