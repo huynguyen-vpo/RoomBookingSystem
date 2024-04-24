@@ -7,23 +7,17 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Room extends Model
+class RoomType extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes;
-    protected $fillable = ['room_number', 'view','price', 'status', 'room_typeid'];
+    use HasFactory, HasUuids;
+    protected $fillable = ['type', 'capacity'];
     protected $casts = [
         'id' => 'string',
     ];
-    public function type(): BelongsTo{
-        return $this->belongsTo(RoomType::class,'room_typeid', 'id');
-    }
-    public function scopeAvailable(Builder $query, string $status): Builder{
-        return $query->where('status', $status)
-                        ->with('type')
-                        ->orderByDesc('created_at');
+    public function rooms(): HasMany{
+        return $this->hasMany(Room::class, 'room_typeid','id');
     }
     public function scopeCapacity(Builder $query, int $capcity): Builder{
         $current = 0;
@@ -33,8 +27,6 @@ class Room extends Model
         else $current = 4;
         
         return $query->where('capacity', $current)
-                        ->available()
-                        ->with('type')
                         ->orderByDesc('created_at');
     }
 }

@@ -15,16 +15,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        $this->call(AvailableQuantitySeeder::class);
+                $this->call(RoomTypeSeeder::class);
+                $this->call(RoomSeeder::class);
         DB::beginTransaction();
             try{
-              //  $this->call(AvailableQuantitySeeder::class);
-              //  $this->call(RoomTypeSeeder::class);
-             //   $this->call(RoomSeeder::class);
-             //   \App\Models\User::factory(100)->create();
-                 $this->call(GroupSeeder::class);
-              //  $this->call(UserGroupSeeder::class);
-             //   $this->call(BookingSeeder::class);
-              //  $this->call(BookedRoomDaySeeder::class);
+                $this->call(AvailableQuantitySeeder::class);
+                $this->call(RoomTypeSeeder::class);
+                $this->call(RoomSeeder::class);
+                // $this->call(UserSeeder::class);
+                // $this->call(GroupSeeder::class);
+                // $this->call(UserGroupSeeder::class);
+                // $this->call(BookingSeeder::class);
+                // $this->call(BookedRoomDaySeeder::class);
 
                 DB::commit();
             }catch(Exception $e){
