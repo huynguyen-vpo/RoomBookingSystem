@@ -1,40 +1,23 @@
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+type Room {
+    id: ID!
+    room_number: Int!
+    view: String!
+    price: Int!
+    status: String!
+    created_at: DateTime
+    deleted_at: DateTime
+    type: RoomType! @belongsTo
+}
+
+type RoomType{
+    id: ID!
+    type: String!,
+    capacity: Int!
+    room: Room! @hasMany
+}
 type User {
     id: ID!
     name: String!
     email: String!
-}
-
-type AuthPayload {
-    access_token: String
-    refresh_token: String
-    expires_in: Int
-    token_type: String
-    user: User
-}
-
-type RefreshTokenPayload {
-    access_token: String!
-    refresh_token: String!
-    expires_in: Int!
-    token_type: String!
-}
-
-type LogoutResponse {
-    status: String!
-    message: String
-}
-
-type ForgotPasswordResponse {
-    status: String!
-    message: String
-}
-
-type RegisterResponse {
-    tokens: AuthPayload
-    status: RegisterStatuses!
-}
-
-type UpdatePasswordResponse {
-    status: String!
-    message: String
 }

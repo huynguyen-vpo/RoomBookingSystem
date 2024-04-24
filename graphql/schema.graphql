@@ -1,4 +1,4 @@
+#import types.graphql
 #import enums.graphql
 #import inputs.graphql
-#import types.graphql
-#import auth.graphql
+#import room.graphql
