@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use Exception;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,6 +15,21 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
+        DB::beginTransaction();
+            try{
+              //  $this->call(AvailableQuantitySeeder::class);
+              //  $this->call(RoomTypeSeeder::class);
+             //   $this->call(RoomSeeder::class);
+             //   \App\Models\User::factory(100)->create();
+                 $this->call(GroupSeeder::class);
+              //  $this->call(UserGroupSeeder::class);
+             //   $this->call(BookingSeeder::class);
+              //  $this->call(BookedRoomDaySeeder::class);
+
+                DB::commit();
+            }catch(Exception $e){
+                DB::rollBack();
+                logger()->error($e->getMessage());
+            }
     }
 }

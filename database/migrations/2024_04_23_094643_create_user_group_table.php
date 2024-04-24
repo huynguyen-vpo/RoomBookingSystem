@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateRoomsTable extends Migration
+class CreateUserGroupTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,9 @@ class CreateRoomsTable extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('social_providers');
-        Schema::create('rooms', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::create('user_group', function (Blueprint $table) {
+            $table->uuid('user_id');
+            $table->uuid('group_id');
         });
     }
 
@@ -27,6 +26,6 @@ class CreateRoomsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('rooms');
+        Schema::dropIfExists('user_group');
     }
 }
