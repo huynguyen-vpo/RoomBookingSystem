@@ -1,0 +1,13 @@
+scalar DateTime
+  @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+  
+extend type Query{
+    # bookings: [Booking!]! @paginate(defaultCount: 10)
+    bookings(filter: BookingFilter): [Booking!]! @field(resolver: "App\\GraphQL\\Queries\\BookingQuery@filter")
+}
+
+extend type Mutation{
+   createBookingByUser(input: CreateBookingByUserInput! @spread): Booking! @field(resolver: "App\\GraphQL\\Mutations\\BookingMutation@createBookingByUser")
+   createBookingByGroup(input: CreateBookingByGroupInput! @spread): Booking! @field(resolver: "App\\GraphQL\\Mutations\\BookingMutation@createBookingByGroup")
+}
+
