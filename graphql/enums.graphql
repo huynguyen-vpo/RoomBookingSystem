@@ -1,4 +1,6 @@
-enum RegisterStatuses {
-    MUST_VERIFY_EMAIL
-    SUCCESS
+enum RoomTypeEnum{
+    SINGLE @enum(value: 1)
+    DOUBLE @enum(value: 2)
+    TRIPLE @enum(value: 3)
+    QUARTER @enum(value: 4)
 }

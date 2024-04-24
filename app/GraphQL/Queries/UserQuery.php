@@ -15,7 +15,7 @@ final class UserQuery
         // TODO implement the resolver
     }
 
-    public function filter(null $_, array $args){
+    public function filter($_, array $args){
         $user = User::query();
   
         if (isset($args['filter'])) {
