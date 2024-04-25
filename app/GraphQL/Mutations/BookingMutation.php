@@ -4,8 +4,6 @@ namespace App\GraphQL\Mutations;
 
 use App\Events\BookingProcessed;
 use App\Exceptions\CustomException;
-use App\Jobs\SendBookingConfirmationEmailJob;
-use App\Jobs\SendEmailJob;
 use App\Models\AvailableQuantity;
 use App\Models\BookedRoomDay;
 use App\Models\Booking;
@@ -16,9 +14,11 @@ use App\Models\User;
 use Carbon\Carbon;
 use DateInterval;
 use DatePeriod;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Http\Request;
 
 final class BookingMutation
 {
@@ -43,16 +43,13 @@ final class BookingMutation
         $doubleTypeId = RoomType::where('type', 'double')->first()->id;
         $tripleTypeId = RoomType::where('type', 'triple')->first()->id;
         $quarterTypeId = RoomType::where('type', 'quarter')->first()->id;
-
     
         $user = User::findOrFail($userId);
-       
-      
 
         if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){   
             $anotherOption = $this->suggestAnotherOption($numberOfPeople, $checkInDate, $checkOutDate);
             throw new CustomException(
-                'Suggest another options '.json_encode($anotherOption));
+                'Suggest another options '.json_encode($anotherOption), 'reason');
         }
 
         # Add booking for user
@@ -102,7 +99,8 @@ final class BookingMutation
         if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){
             $anotherOption = $this->suggestAnotherOption($numberOfPeople, $checkInDate, $checkOutDate);
             throw new CustomException(
-                'Suggest another options '.json_encode($anotherOption));
+                'Suggest another options '.json_encode($anotherOption),
+                'reason');
         }
 
         $user = User::findOrFail($userId);
@@ -116,7 +114,7 @@ final class BookingMutation
                     ->exists()){
 
                 throw new CustomException(
-                    'Bad request: Another user in your group already booked');   
+                    'Bad request: Another user in your group already booked', 'reason');   
             }
 
             # Add booking for group
@@ -144,7 +142,7 @@ final class BookingMutation
         }
         else{
             throw new CustomException(
-                'User is not in group');  
+                'User is not in group', 'reason');  
         }
       
     }
@@ -153,7 +151,7 @@ final class BookingMutation
         // Validate capacity of booking
         if( $numberOfPeople > $singleNumber +  $doubleNumber*2 +  $tripleNumber*3 + $quarterNumber*4){
             throw new CustomException(
-                'The number of peoples exceeds capacity');  
+                'The number of peoples exceeds capacity', 'reason');  
         }
         // Validate available rooms
         $arrayDates = $this->getDatesFromRange($checkInDate, $checkOutDate, 'Y-m-d');

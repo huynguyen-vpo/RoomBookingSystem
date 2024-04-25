@@ -11,7 +11,7 @@
         "joselfonseca/lighthouse-graphql-passport-auth": "^8.0",
         "laravel/framework": "^8.75",
         "laravel/passport": "^10.4",
-        "laravel/telescope": "^5.0",
+        "laravel/telescope": "^4.10",
         "laravel/tinker": "^2.5",
         "maatwebsite/excel": "^3.1",
         "mll-lab/laravel-graphiql": "^2.0",
