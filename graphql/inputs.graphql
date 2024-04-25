@@ -40,7 +40,6 @@ input BookingFilter{
 }
 
 input CreateBookingByUserInput{
-    userId: String  @rules(apply: ["string"]),
     checkInDate: DateTime  @rules(apply: ["date"]),
     checkOutDate: DateTime  @rules(apply: ["date"]),
     numberOfPeople: Int @rules(apply: ["numeric"]),

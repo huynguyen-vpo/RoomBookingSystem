@@ -2,8 +2,8 @@
 
 namespace App\GraphQL\Mutations;
 
-use App\Events\BookingProcessed;
 use App\Exceptions\CustomException;
+use App\Jobs\SendBookingConfirmationEmailJob;
 use App\Models\AvailableQuantity;
 use App\Models\BookedRoomDay;
 use App\Models\Booking;
@@ -14,7 +14,9 @@ use App\Models\User;
 use Carbon\Carbon;
 use DateInterval;
 use DatePeriod;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+
 
 final class BookingMutation
 {
@@ -25,7 +27,8 @@ final class BookingMutation
     {
         // TODO implement the resolver
     }
-    public function createBookingByUser($_, array $args){  
+    public function createBookingByUser($_, array $args){ 
+        $userId = Auth::id();
         $numberOfPeople = $args['numberOfPeople'];
         $singleNumber = $args['singleNumber'];
         $doubleNumber = $args['doubleNumber'];
@@ -39,14 +42,17 @@ final class BookingMutation
         $tripleTypeId = RoomType::where('type', 'triple')->first()->id;
         $quarterTypeId = RoomType::where('type', 'quarter')->first()->id;
 
+        // Send email to client after receiving booking
+        $user = User::findOrFail($userId);
+        dispatch(new SendBookingConfirmationEmailJob($user->id));
+
         if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){   
-            $anotherOption = $this->suggestAnotherOption($numberOfPeople, $checkInDate);
+            $anotherOption = $this->suggestAnotherOption($numberOfPeople, $checkInDate, $checkOutDate);
             throw new CustomException(
                 'Suggest another options '.json_encode($anotherOption));
         }
 
         # Add booking for user
-        $user = User::findOrFail($args['userId']);
         $newBooking = new Booking();
         $newBooking->check_in_date = $args['checkInDate'];
         $newBooking->check_out_date = $args['checkOutDate'];
@@ -55,9 +61,8 @@ final class BookingMutation
         $user->bookings()->save($newBooking);
         $bookingId = $newBooking->id;
 
-        // Send email to client after creating booking
-        event(new BookingProcessed($newBooking));
-      
+        
+
         # Add booked room days
         $arrayDates = $this->getDatesFromRange($checkInDate, $checkOutDate, 'Y-m-d');
         foreach($arrayDates as $key => $value){
@@ -72,6 +77,7 @@ final class BookingMutation
     }
 
     public function createBookingByGroup($_, array $args){
+        $userId = Auth::id();
         $groupId = $args['groupId'];
         $numberOfPeople = $args['numberOfPeople'];
         $singleNumber = $args['singleNumber'];
@@ -88,12 +94,12 @@ final class BookingMutation
         $quarterTypeId = RoomType::where('type', 'quarter')->first()->id;
 
         if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){
-            $anotherOption = $this->suggestAnotherOption($numberOfPeople, $checkInDate);
+            $anotherOption = $this->suggestAnotherOption($numberOfPeople, $checkInDate, $checkOutDate);
             throw new CustomException(
                 'Suggest another options '.json_encode($anotherOption));
         }
 
-        $user = User::findOrFail($args['userId']);
+        $user = User::findOrFail($userId);
         if($user->groups()->where('groups.id',$groupId )->exists()){
             $group = Group::findOrFail($args['groupId']);
             
@@ -106,6 +112,9 @@ final class BookingMutation
                 throw new CustomException(
                     'Bad request: Another user in your group already booked');   
             }
+
+            // Send email to client after receiving booking
+            dispatch(new SendBookingConfirmationEmailJob($user->id));
 
             # Add booking for group
             $newBooking = new Booking();
@@ -143,11 +152,11 @@ final class BookingMutation
         $arrayDates = $this->getDatesFromRange($checkInDate, $checkOutDate, 'Y-m-d');
         DB::beginTransaction();
         foreach($arrayDates as $key => $value){
-            $availabelQuantity = AvailableQuantity::whereDate('date', $value)->first();
-            $singleRemainingQuantity = $availabelQuantity->value('single_remaining_quantity');
-            $doubleRemainingQuantity = $availabelQuantity->value('double_remaining_quantity');
-            $tripleRemainingQuantity = $availabelQuantity->value('triple_remaining_quantity');
-            $quarterRemainingQuantity = $availabelQuantity->value('quarter_remaining_quantity');
+            $availabelQuantity = AvailableQuantity::where('date', $value)->first();
+            $singleRemainingQuantity = $availabelQuantity->single_remaining_quantity;
+            $doubleRemainingQuantity = $availabelQuantity->double_remaining_quantity;
+            $tripleRemainingQuantity = $availabelQuantity->triple_remaining_quantity;
+            $quarterRemainingQuantity = $availabelQuantity->quarter_remaining_quantity;
       
             if( ($singleNumber >  $singleRemainingQuantity)
                 || ($doubleNumber >  $doubleRemainingQuantity)
@@ -203,32 +212,54 @@ final class BookingMutation
         return   $availableRoomIdOfType;                                      
     }
 
-    public function suggestAnotherOption($numberOfPeople, $bookingDate){
-        $availabelQuantity = AvailableQuantity::whereDate('date', $bookingDate)->first();
-        $singleRemainingQuantity = $availabelQuantity->value('single_remaining_quantity');
-        $doubleRemainingQuantity = $availabelQuantity->value('double_remaining_quantity');
-        $tripleRemainingQuantity = $availabelQuantity->value('triple_remaining_quantity');
-        $quarterRemainingQuantity = $availabelQuantity->value('quarter_remaining_quantity');
-        $remainingQuantity =  array(4 => $quarterRemainingQuantity,
-                                    3 =>  $tripleRemainingQuantity,
-                                    2 =>  $doubleRemainingQuantity,
-                                    1 => $singleRemainingQuantity);
-        
-        $capacity = array(4,3,2,1);
-        $result = array(4 => 0, 3 => 0, 2 => 0, 1 => 0);
-        $i = 0;
-        while($numberOfPeople > 0 && $i < sizeof($capacity)){
-            if($numberOfPeople >= $capacity[$i]){     
-                $numberOfRoom = min(intdiv($numberOfPeople,$capacity[$i]), $remainingQuantity[$capacity[$i]]);
-                $numberOfPeople = $numberOfPeople - $numberOfRoom*$capacity[$i];
-                $result[$capacity[$i]] = $numberOfRoom;
+    public function suggestAnotherOption($numberOfPeople, $checkInDate, $checkOutDate){
+        // Check if remaining quantity is valid between checkin date and checkout date
+        $arrayDates = $this->getDatesFromRange($checkInDate, $checkOutDate, 'Y-m-d');
+        $arrayResult = array();
+        foreach($arrayDates as $key => $value){
+            $availabelQuantity = AvailableQuantity::where('date', $value)->first();
+            $singleRemainingQuantity = $availabelQuantity->single_remaining_quantity;
+            $doubleRemainingQuantity = $availabelQuantity->double_remaining_quantity;
+            $tripleRemainingQuantity = $availabelQuantity->triple_remaining_quantity;
+            $quarterRemainingQuantity = $availabelQuantity->quarter_remaining_quantity;
+            
+            $remainingQuantity =  array(4 => $quarterRemainingQuantity,
+                                        3 =>  $tripleRemainingQuantity,
+                                        2 =>  $doubleRemainingQuantity,
+                                        1 => $singleRemainingQuantity);
+            
+            $capacity = array(4,3,2,1);
+            $result = array(4 => 0, 3 => 0, 2 => 0, 1 => 0);
+            $i = 0;
+            $cloneNumberOfPeople = $numberOfPeople;
+            // Generate suggest option at each booking date
+            while( $cloneNumberOfPeople > 0 && $i < sizeof($capacity)){
+                if( $cloneNumberOfPeople >= $capacity[$i]){     
+                    $numberOfRoom = min(intdiv($cloneNumberOfPeople,$capacity[$i]), $remainingQuantity[$capacity[$i]]);
+                    $cloneNumberOfPeople -= $numberOfRoom*$capacity[$i];
+                    $result[$capacity[$i]] = $numberOfRoom;
+                }
+                $i++;
             }
-            $i++;
+
+            // Push suggest option to result array
+            array_push($arrayResult, $result);
         }
-        $customResult = array("Quarter" => $result[4],
-                              "Triple" => $result[3], 
-                              "Double" => $result[2],
-                              "Single" => $result[1]);
-         return $customResult;
+
+        // Check if all value of result array are equal, if not, client must choose another checkin date and checkout date
+        $uniqueArray = array_unique($arrayResult, SORT_REGULAR);
+        if(count($uniqueArray) == 1){
+            return $this->customArray($uniqueArray[0]);
+        }
+        
+       return "Out of room! Please select another check in date and check out date!";
+    }
+
+    public function customArray($array){
+        return array("Quarter" => $array[4],
+                    "Triple" => $array[3],
+                    "Double" => $array[2],
+                    "Single" => $array[1]);
     }
 }
+

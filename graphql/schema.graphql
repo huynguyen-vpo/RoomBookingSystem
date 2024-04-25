@@ -1,8 +1,8 @@
 #import types.graphql
 #import enums.graphql
 #import inputs.graphql
-#import users.graphql
-#import groups.graphql
+
+
 #import booking.graphql
 #import room.graphql
 #import auth.graphql
