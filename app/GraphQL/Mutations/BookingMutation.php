@@ -42,9 +42,7 @@ final class BookingMutation
         $tripleTypeId = RoomType::where('type', 'triple')->first()->id;
         $quarterTypeId = RoomType::where('type', 'quarter')->first()->id;
 
-        // Send email to client after receiving booking
         $user = User::findOrFail($userId);
-        dispatch(new SendBookingConfirmationEmailJob($user->id));
 
         if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){   
             $anotherOption = $this->suggestAnotherOption($numberOfPeople, $checkInDate, $checkOutDate);
@@ -71,7 +69,8 @@ final class BookingMutation
             $this->addBookedRoomDays($bookingId , $value, $tripleTypeId,  $tripleNumber);
             $this->addBookedRoomDays($bookingId , $value, $quarterTypeId,  $quarterNumber);
         }
-    
+        
+        dispatch(new SendBookingConfirmationEmailJob($user->id));
         return $newBooking;
         
     }
