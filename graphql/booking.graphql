@@ -8,6 +8,6 @@ extend type Query{
 
 extend type Mutation{
    createBookingByUser(input: CreateBookingByUserInput! @spread): Booking! @guard(with: ["api"]) @field(resolver: "App\\GraphQL\\Mutations\\BookingMutation@createBookingByUser")
-   createBookingByGroup(input: CreateBookingByGroupInput! @spread): Booking! @field(resolver: "App\\GraphQL\\Mutations\\BookingMutation@createBookingByGroup")
+   createBookingByGroup(input: CreateBookingByGroupInput! @spread): Booking! @guard(with: ["api"]) @field(resolver: "App\\GraphQL\\Mutations\\BookingMutation@createBookingByGroup")
 }
 

@@ -16,9 +16,11 @@ use App\Models\User;
 use Carbon\Carbon;
 use DateInterval;
 use DatePeriod;
+use Exception;
+use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\RateLimiter;
 
 final class BookingMutation
 {
@@ -29,7 +31,7 @@ final class BookingMutation
     {
         // TODO implement the resolver
     }
-    public function createBookingByUser($_, array $args){ 
+    public function createBookingByUser($_, array $args){
         $userId = Auth::id();
         $numberOfPeople = $args['numberOfPeople'];
         $singleNumber = $args['singleNumber'];
@@ -83,6 +85,19 @@ final class BookingMutation
     }
 
     public function createBookingByGroup($_, array $args){
+    
+        $executed = RateLimiter::attempt(
+            'send-message:'.$args['groupId'],
+            $perMinute = 1,
+            function() {
+                return true;
+            }
+        );
+        if (! $executed) {
+            throw new CustomException(
+            'Bad request by rate limiter: Another user in your group already booked');
+          }
+    
         $userId = Auth::id();
         $groupId = $args['groupId'];
         $numberOfPeople = $args['numberOfPeople'];
