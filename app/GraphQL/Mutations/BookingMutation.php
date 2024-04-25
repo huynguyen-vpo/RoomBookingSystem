@@ -2,8 +2,10 @@
 
 namespace App\GraphQL\Mutations;
 
+use App\Events\BookingProcessed;
 use App\Exceptions\CustomException;
 use App\Jobs\SendBookingConfirmationEmailJob;
+use App\Jobs\SendEmailJob;
 use App\Models\AvailableQuantity;
 use App\Models\BookedRoomDay;
 use App\Models\Booking;
@@ -42,7 +44,10 @@ final class BookingMutation
         $tripleTypeId = RoomType::where('type', 'triple')->first()->id;
         $quarterTypeId = RoomType::where('type', 'quarter')->first()->id;
 
+    
         $user = User::findOrFail($userId);
+       
+      
 
         if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){   
             $anotherOption = $this->suggestAnotherOption($numberOfPeople, $checkInDate, $checkOutDate);
@@ -58,8 +63,7 @@ final class BookingMutation
         $newBooking->user_id = $user->id;
         $user->bookings()->save($newBooking);
         $bookingId = $newBooking->id;
-
-        
+  
 
         # Add booked room days
         $arrayDates = $this->getDatesFromRange($checkInDate, $checkOutDate, 'Y-m-d');
@@ -69,8 +73,11 @@ final class BookingMutation
             $this->addBookedRoomDays($bookingId , $value, $tripleTypeId,  $tripleNumber);
             $this->addBookedRoomDays($bookingId , $value, $quarterTypeId,  $quarterNumber);
         }
-        
-        dispatch(new SendBookingConfirmationEmailJob($user->id));
+
+        // Send email to client after receiving booking
+        // dispatch(new SendBookingConfirmationEmailJob($user->id))->onQueue('email');
+        event(new BookingProcessed($newBooking));
+    
         return $newBooking;
         
     }
@@ -112,9 +119,6 @@ final class BookingMutation
                     'Bad request: Another user in your group already booked');   
             }
 
-            // Send email to client after receiving booking
-            dispatch(new SendBookingConfirmationEmailJob($user->id));
-
             # Add booking for group
             $newBooking = new Booking();
             $newBooking->check_in_date = $checkInDate;
@@ -132,6 +136,10 @@ final class BookingMutation
                 $this->addBookedRoomDays($bookingId , $value, $tripleTypeId,  $tripleNumber);
                 $this->addBookedRoomDays($bookingId , $value, $quarterTypeId,  $quarterNumber);
             }
+
+            // Send email to client after receiving booking
+            // dispatch(new SendBookingConfirmationEmailJob($user->id));
+            event(new BookingProcessed($newBooking));
             return $newBooking;
         }
         else{
