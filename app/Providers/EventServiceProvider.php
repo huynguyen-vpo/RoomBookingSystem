@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Events\BookingProcessed;
+use App\Jobs\SendBookingConfirmationEmailJob;
+use App\Listeners\SendEmail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -27,6 +30,9 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Event::listen(
+            BookingProcessed::class,
+            [SendEmail::class, 'handle']
+        );
     }
 }
