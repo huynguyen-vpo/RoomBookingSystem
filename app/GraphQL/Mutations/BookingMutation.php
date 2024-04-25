@@ -14,6 +14,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use DateInterval;
 use DatePeriod;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 
@@ -26,7 +27,8 @@ final class BookingMutation
     {
         // TODO implement the resolver
     }
-    public function createBookingByUser($_, array $args){  
+    public function createBookingByUser($_, array $args){ 
+        $userId = Auth::id();
         $numberOfPeople = $args['numberOfPeople'];
         $singleNumber = $args['singleNumber'];
         $doubleNumber = $args['doubleNumber'];
@@ -41,7 +43,7 @@ final class BookingMutation
         $quarterTypeId = RoomType::where('type', 'quarter')->first()->id;
 
         // Send email to client after receiving booking
-        $user = User::findOrFail($args['userId']);
+        $user = User::findOrFail($userId);
         dispatch(new SendBookingConfirmationEmailJob($user->id));
 
         if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){   
@@ -59,6 +61,8 @@ final class BookingMutation
         $user->bookings()->save($newBooking);
         $bookingId = $newBooking->id;
 
+        
+
         # Add booked room days
         $arrayDates = $this->getDatesFromRange($checkInDate, $checkOutDate, 'Y-m-d');
         foreach($arrayDates as $key => $value){
@@ -73,6 +77,7 @@ final class BookingMutation
     }
 
     public function createBookingByGroup($_, array $args){
+        $userId = Auth::id();
         $groupId = $args['groupId'];
         $numberOfPeople = $args['numberOfPeople'];
         $singleNumber = $args['singleNumber'];
@@ -94,7 +99,7 @@ final class BookingMutation
                 'Suggest another options '.json_encode($anotherOption));
         }
 
-        $user = User::findOrFail($args['userId']);
+        $user = User::findOrFail($userId);
         if($user->groups()->where('groups.id',$groupId )->exists()){
             $group = Group::findOrFail($args['groupId']);
             
@@ -241,7 +246,7 @@ final class BookingMutation
             array_push($arrayResult, $result);
         }
 
-        // Check if all value of result array are equal, if not client must choose another checkin date and checkout date
+        // Check if all value of result array are equal, if not, client must choose another checkin date and checkout date
         $uniqueArray = array_unique($arrayResult, SORT_REGULAR);
         if(count($uniqueArray) == 1){
             return $this->customArray($uniqueArray[0]);

@@ -5,7 +5,7 @@
 </head>
 <body>
     <div>
-        <p>Dear {{ name }} </p>
+        <p>Dear {{ $name }} </p>
 
 		<p> Thank you for choosing our hotel! Your reservation is received. We're thrilled to host you for a memorable stay.
 	    Please review your booking details below. If you have any questions or special requests, feel free to reach out.

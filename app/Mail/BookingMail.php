@@ -12,7 +12,7 @@ class BookingMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $name;
+    private $name;
 
     /**
      * Create a new message instance.
@@ -32,10 +32,10 @@ class BookingMail extends Mailable
     public function build()
     {
         return $this->from('duyen.du@vina-payroll.com')
-        ->view('emails/booking-email')
-        ->with([
-            'name' => $this->name,
-          ])
-        ->subject('Your Booking Is Received!');
+                    ->view('emails/booking-email')
+                    ->with([
+                        'name' => $this->name,
+                        ])
+                    ->subject('Your Booking Is Received!');
     }
 }
