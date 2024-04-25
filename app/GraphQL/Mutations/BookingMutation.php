@@ -14,9 +14,6 @@ use App\Models\User;
 use Carbon\Carbon;
 use DateInterval;
 use DatePeriod;
-use Illuminate\Cache\RateLimiting\Limit;
-use Exception;
-use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
@@ -83,7 +80,7 @@ final class BookingMutation
     public function createBookingByGroup($_, array $args){
     
         $executed = RateLimiter::attempt(
-            'send-message:'.$args['groupId'],
+            'booking-by-group:'.$args['groupId'],
             $perMinute = 1,
             function() {
                 return true;
@@ -92,7 +89,7 @@ final class BookingMutation
         if (! $executed) {
             throw new CustomException(
             'Bad request by rate limiter: Another user in your group already booked');
-          }
+        }
     
         $userId = Auth::id();
         $groupId = $args['groupId'];
@@ -113,8 +110,7 @@ final class BookingMutation
         if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){
             $anotherOption = $this->suggestAnotherOption($numberOfPeople, $checkInDate, $checkOutDate);
             throw new CustomException(
-                'Suggest another options '.json_encode($anotherOption),
-                'reason');
+                'Suggest another options '.json_encode($anotherOption));
         }
 
         $user = User::findOrFail($userId);
@@ -128,7 +124,7 @@ final class BookingMutation
                     ->exists()){
 
                 throw new CustomException(
-                    'Bad request: Another user in your group already booked', 'reason');   
+                    'Bad request: Another user in your group already booked');   
             }
 
             # Add booking for group
@@ -156,7 +152,7 @@ final class BookingMutation
         }
         else{
             throw new CustomException(
-                'User is not in group', 'reason');  
+                'User is not in group');  
         }
       
     }
@@ -165,7 +161,7 @@ final class BookingMutation
         // Validate capacity of booking
         if( $numberOfPeople > $singleNumber +  $doubleNumber*2 +  $tripleNumber*3 + $quarterNumber*4){
             throw new CustomException(
-                'The number of peoples exceeds capacity', 'reason');  
+                'The number of peoples exceeds capacity');  
         }
         // Validate available rooms
         $arrayDates = $this->getDatesFromRange($checkInDate, $checkOutDate, 'Y-m-d');
@@ -271,7 +267,8 @@ final class BookingMutation
             return $this->customArray($uniqueArray[0]);
         }
         
-       return "Out of room! Please select another check in date and check out date!";
+       throw new CustomException(
+        'Out of room! Please select another check in date and check out date!');  
     }
 
     public function customArray($array){
