@@ -23,6 +23,8 @@ final class RoomMutation
         try{
             $created = Room::create([
                 "room_number" => $args["roomNumber"],
+                "view" => $args["view"],
+                "price" => $args["price"],
                 "status" => $args["status"] ?? "Available",
                 "room_typeid" => $args["roomType"] ? $roomTypeId : null  
             ]);
@@ -37,6 +39,8 @@ final class RoomMutation
         try{
             $room->update([
                 "room_number" => $args["roomNumber"] ?? $room->room_number,
+                "view" => $args["view"] ?? $room->view,
+                "price" => $args["price"] ?? $room->price,
                 "status" => $args["status"] ?? "Available",
                 "room_typeid" => $args["roomType"] ? $roomTypeId : $room->room_typeid 
             ]);

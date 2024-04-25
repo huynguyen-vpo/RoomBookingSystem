@@ -42,6 +42,7 @@ class RoomPolicy
     public function create(User $user)
     {
         //
+        return $user->role === "Admin";
     }
 
     /**
@@ -54,6 +55,7 @@ class RoomPolicy
     public function update(User $user, Room $room)
     {
         //
+        return $user->role === "Admin";
     }
 
     /**
@@ -66,6 +68,7 @@ class RoomPolicy
     public function delete(User $user, Room $room)
     {
         //
+        return $user->role === "Admin";
     }
 
     /**

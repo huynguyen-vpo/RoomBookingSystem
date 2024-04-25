@@ -1,5 +1,7 @@
 input CreateRoomInput {
     roomNumber: Int @rules(apply:["required", "int", "unique:rooms,room_number"]),
+    view: String!
+    price: Int!
     status: String,
     roomType: RoomTypeEnum!,
 }
@@ -7,6 +9,8 @@ input CreateRoomInput {
 input UpdateRoomInput {
     id: ID!,
     roomNumber: Int @rules(apply:["int", "unique:rooms,room_number"]),
+    view: String!
+    price: Int!
     status: String,
     roomType: RoomTypeEnum!,
 }

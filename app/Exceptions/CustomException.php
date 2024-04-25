@@ -10,7 +10,7 @@ final class CustomException extends Exception implements RendersErrorsExtensions
     protected $reason;
      /** @var @string */
 
-     public function __construct(string $message, string $reason)
+     public function __construct(string $message, string $reason = "")
      {
          parent::__construct($message);
          $this->reason = $reason;
