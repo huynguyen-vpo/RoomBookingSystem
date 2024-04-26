@@ -93,7 +93,7 @@ final class BookingMutation
         );
         if (! $executed) {
             throw new CustomException(
-            'Bad request by rate limiter: Another user in your group already booked');
+            'Bad request by rate limiter: You already booked');
         }
     
         $userId = Auth::id();
@@ -127,6 +127,7 @@ final class BookingMutation
             }
         }
         else{
+            RateLimiter::clear('booking-by-group:'.$groupId);
             throw new CustomException(
                 'User is not in group');  
         }
@@ -161,6 +162,7 @@ final class BookingMutation
         }
         catch(Throwable $e){
             DB::rollBack();
+            RateLimiter::clear('booking-by-group:'.$groupId);
             throw new CustomException($e->getMessage());
         }        
     }
@@ -272,7 +274,7 @@ final class BookingMutation
             throw new CustomException(
                 'Suggest another options '.json_encode($this->customArray($uniqueArray[0])));
         }
-        
+
        throw new CustomException(
         'Out of room! Please select another check in date and check out date!');  
     }
