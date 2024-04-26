@@ -14,9 +14,11 @@ use App\Models\User;
 use Carbon\Carbon;
 use DateInterval;
 use DatePeriod;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
+use Throwable;
 
 final class BookingMutation
 {
@@ -44,36 +46,39 @@ final class BookingMutation
     
         $user = User::findOrFail($userId);
 
-        if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){   
-            $anotherOption = $this->suggestAnotherOption($numberOfPeople, $checkInDate, $checkOutDate);
-            throw new CustomException(
-                'Suggest another options '.json_encode($anotherOption), 'reason');
+        try{
+            DB::beginTransaction();
+            $this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate);
+
+
+            # Add booking for user
+            $newBooking = new Booking();
+            $newBooking->check_in_date = $args['checkInDate'];
+            $newBooking->check_out_date = $args['checkOutDate'];
+            $newBooking->total_price =  0;
+            $newBooking->user_id = $user->id;
+            $user->bookings()->save($newBooking);
+            $bookingId = $newBooking->id;      
+
+            # Add booked room days
+            $arrayDates = $this->getDatesFromRange($checkInDate, $checkOutDate, 'Y-m-d');
+            foreach($arrayDates as $key => $value){
+                $this->addBookedRoomDays($bookingId , $value, $singleTypeId,  $singleNumber);
+                $this->addBookedRoomDays($bookingId , $value, $doubleTypeId,  $doubleNumber);
+                $this->addBookedRoomDays($bookingId , $value, $tripleTypeId,  $tripleNumber);
+                $this->addBookedRoomDays($bookingId , $value, $quarterTypeId,  $quarterNumber);
+            }
+
+            // Send email to client after receiving booking
+            // dispatch(new SendBookingConfirmationEmailJob($user->id));
+            event(new BookingProcessed($newBooking));
+            return $newBooking;
+            DB::commit();
         }
-
-        # Add booking for user
-        $newBooking = new Booking();
-        $newBooking->check_in_date = $args['checkInDate'];
-        $newBooking->check_out_date = $args['checkOutDate'];
-        $newBooking->total_price =  0;
-        $newBooking->user_id = $user->id;
-        $user->bookings()->save($newBooking);
-        $bookingId = $newBooking->id;
-  
-
-        # Add booked room days
-        $arrayDates = $this->getDatesFromRange($checkInDate, $checkOutDate, 'Y-m-d');
-        foreach($arrayDates as $key => $value){
-            $this->addBookedRoomDays($bookingId , $value, $singleTypeId,  $singleNumber);
-            $this->addBookedRoomDays($bookingId , $value, $doubleTypeId,  $doubleNumber);
-            $this->addBookedRoomDays($bookingId , $value, $tripleTypeId,  $tripleNumber);
-            $this->addBookedRoomDays($bookingId , $value, $quarterTypeId,  $quarterNumber);
-        }
-
-        // Send email to client after receiving booking
-        // dispatch(new SendBookingConfirmationEmailJob($user->id))->onQueue('email');
-        event(new BookingProcessed($newBooking));
-    
-        return $newBooking;
+        catch(Throwable $e){
+            DB::rollBack();
+            throw new CustomException($e->getMessage());
+        }        
         
     }
 
@@ -107,25 +112,28 @@ final class BookingMutation
         $tripleTypeId = RoomType::where('type', 'triple')->first()->id;
         $quarterTypeId = RoomType::where('type', 'quarter')->first()->id;
 
-        if(!$this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate)){
-            $anotherOption = $this->suggestAnotherOption($numberOfPeople, $checkInDate, $checkOutDate);
-            throw new CustomException(
-                'Suggest another options '.json_encode($anotherOption));
-        }
 
         $user = User::findOrFail($userId);
         if($user->groups()->where('groups.id',$groupId )->exists()){
             $group = Group::findOrFail($args['groupId']);
-            
-            # Validate if another user of the group already booked in the current date
-            $currentDate = date('Y-m-d');
-            if(Booking::where('target_id', $groupId)
-                    ->whereDate('created_at', [$currentDate])
-                    ->exists()){
 
-                throw new CustomException(
-                    'Bad request: Another user in your group already booked');   
+             # Validate if another user of the group already booked in the current date
+             $currentDate = date('Y-m-d');
+             if(Booking::where('target_id', $groupId)
+                     ->whereDate('created_at', [$currentDate])
+                     ->exists()){
+                 throw new CustomException(
+                     'Bad request: Another user in your group already booked'); 
             }
+        }
+        else{
+            throw new CustomException(
+                'User is not in group');  
+        }
+
+        try{
+            DB::beginTransaction();
+            $this->validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate);
 
             # Add booking for group
             $newBooking = new Booking();
@@ -135,7 +143,7 @@ final class BookingMutation
             $newBooking->user_id = $user->id;
             $group->bookings()->save($newBooking); 
             $bookingId = $newBooking->id;       
-           
+
             # Add booked room days
             $arrayDates = $this->getDatesFromRange($checkInDate, $checkOutDate, 'Y-m-d');
             foreach($arrayDates as $key => $value){
@@ -149,12 +157,12 @@ final class BookingMutation
             // dispatch(new SendBookingConfirmationEmailJob($user->id));
             event(new BookingProcessed($newBooking));
             return $newBooking;
+            DB::commit();
         }
-        else{
-            throw new CustomException(
-                'User is not in group');  
-        }
-      
+        catch(Throwable $e){
+            DB::rollBack();
+            throw new CustomException($e->getMessage());
+        }        
     }
 
     public function validateNumberOfRoom($numberOfPeople, $singleNumber, $doubleNumber, $tripleNumber,  $quarterNumber, $checkInDate,  $checkOutDate){
@@ -165,7 +173,6 @@ final class BookingMutation
         }
         // Validate available rooms
         $arrayDates = $this->getDatesFromRange($checkInDate, $checkOutDate, 'Y-m-d');
-        DB::beginTransaction();
         foreach($arrayDates as $key => $value){
             $availabelQuantity = AvailableQuantity::where('date', $value)->first();
             $singleRemainingQuantity = $availabelQuantity->single_remaining_quantity;
@@ -177,8 +184,7 @@ final class BookingMutation
                 || ($doubleNumber >  $doubleRemainingQuantity)
                 || ($tripleNumber >  $tripleRemainingQuantity)
                 || ($quarterNumber >  $quarterRemainingQuantity)){
-                    DB::rollBack();
-                    return false;
+                    return $this->suggestAnotherOption($numberOfPeople, $checkInDate, $checkOutDate);                   
                 }  
             
             $availabelQuantity->update(['single_remaining_quantity' => $singleRemainingQuantity - $singleNumber,
@@ -187,7 +193,6 @@ final class BookingMutation
             'quarter_remaining_quantity' => $quarterRemainingQuantity - $quarterNumber]);
                  
         }
-        DB::commit();
         return true;
         
     }
@@ -264,7 +269,8 @@ final class BookingMutation
         // Check if all value of result array are equal, if not, client must choose another checkin date and checkout date
         $uniqueArray = array_unique($arrayResult, SORT_REGULAR);
         if(count($uniqueArray) == 1){
-            return $this->customArray($uniqueArray[0]);
+            throw new CustomException(
+                'Suggest another options '.json_encode($this->customArray($uniqueArray[0])));
         }
         
        throw new CustomException(

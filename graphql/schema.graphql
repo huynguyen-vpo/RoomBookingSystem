@@ -6,3 +6,5 @@
 #import booking.graphql
 #import room.graphql
 #import auth.graphql
+#import users.graphql
+#import groups.graphql

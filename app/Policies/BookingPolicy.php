@@ -41,7 +41,7 @@ class BookingPolicy
      */
     public function create(User $user)
     {
-        return $user->role == 'User';
+        return $user->role === 'User';
     }
 
     /**
