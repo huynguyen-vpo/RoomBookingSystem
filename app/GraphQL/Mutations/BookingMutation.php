@@ -72,8 +72,8 @@ final class BookingMutation
             // Send email to client after receiving booking
             // dispatch(new SendBookingConfirmationEmailJob($user->id));
             event(new BookingProcessed($newBooking));
-            return $newBooking;
             DB::commit();
+            return $newBooking;
         }
         catch(Throwable $e){
             DB::rollBack();
@@ -156,8 +156,8 @@ final class BookingMutation
             // Send email to client after receiving booking
             // dispatch(new SendBookingConfirmationEmailJob($user->id));
             event(new BookingProcessed($newBooking));
-            return $newBooking;
             DB::commit();
+            return $newBooking;
         }
         catch(Throwable $e){
             DB::rollBack();
